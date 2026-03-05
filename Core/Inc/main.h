@@ -65,12 +65,24 @@ void Error_Handler(void);
 #define USART_RX_GPIO_Port GPIOA
 #define LD2_Pin GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
+#define LCD_CS_Pin GPIO_PIN_6
+#define LCD_CS_GPIO_Port GPIOA
+#define LCD_DC_Pin GPIO_PIN_7
+#define LCD_DC_GPIO_Port GPIOA
+#define TP_RST_Pin GPIO_PIN_6
+#define TP_RST_GPIO_Port GPIOC
+#define SD_CS_Pin GPIO_PIN_7
+#define SD_CS_GPIO_Port GPIOC
+#define TP_INT_Pin GPIO_PIN_8
+#define TP_INT_GPIO_Port GPIOC
+#define LCD_BL_Pin GPIO_PIN_9
+#define LCD_BL_GPIO_Port GPIOC
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
-#define SWO_Pin GPIO_PIN_3
-#define SWO_GPIO_Port GPIOB
+#define LCD_RST_Pin GPIO_PIN_6
+#define LCD_RST_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
