@@ -26,7 +26,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "SEGGER_RTT.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -95,7 +95,7 @@ int main(void)
   MX_I2C3_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
-
+  SEGGER_RTT_printf(0, "Let's Try RTT in Nucleo! \r\n");
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -112,7 +112,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+    
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
