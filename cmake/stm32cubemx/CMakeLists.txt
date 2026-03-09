@@ -19,6 +19,11 @@ set(MX_Include_Dirs
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Drivers/CMSIS/Device/ST/STM32F4xx/Include
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Drivers/CMSIS/Include
+    # Add by Hsy for LCD
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/Library/Config
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/Library/Fonts
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/Library/GUI
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/Library/lcd
 )
 
 # STM32CubeMX generated application sources
@@ -35,9 +40,10 @@ set(MX_Application_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/sysmem.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/syscalls.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../startup_stm32f411xe.s
-    #RTT Print relative
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/SEGGER_RTT_printf.c
+    #Segger print
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/SEGGER_RTT.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/SEGGER_RTT_printf.c
+    #
 )
 
 # STM32 HAL/LL Drivers
@@ -84,12 +90,16 @@ set(FreeRTOS_Src
 set(MX_LINK_DIRS
 
 )
+
+# LCD Screen Library sources
+file(GLOB_RECURSE SCREEN_LIBRARY_SRC "${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/Library/*.c" )
+
 # Project static libraries
 set(MX_LINK_LIBS 
     STM32_Drivers
     ${TOOLCHAIN_LINK_LIBRARIES}
     FreeRTOS
-	
+	Screen
 )
 # Interface library for includes and symbols
 add_library(stm32cubemx INTERFACE)
@@ -106,6 +116,12 @@ target_link_libraries(STM32_Drivers PUBLIC stm32cubemx)
 add_library(FreeRTOS OBJECT)
 target_sources(FreeRTOS PRIVATE ${FreeRTOS_Src})
 target_link_libraries(FreeRTOS PUBLIC stm32cubemx)
+
+
+# Add by hsy for Screen
+add_library(Screen OBJECT)
+target_sources(Screen PRIVATE ${SCREEN_LIBRARY_SRC})
+target_link_libraries(Screen PUBLIC stm32cubemx)
 
 # Add STM32CubeMX generated application sources to the project
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE ${MX_Application_Src})

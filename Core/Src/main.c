@@ -95,7 +95,7 @@ int main(void)
   MX_I2C3_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
-  SEGGER_RTT_printf(0, "Let's Try RTT in Nucleo! \r\n");
+  SEGGER_RTT_printf(0, "%sLet's Try RTT in Nucleo! \r\n%s",RTT_CTRL_TEXT_RED,RTT_CTRL_RESET);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -112,7 +112,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

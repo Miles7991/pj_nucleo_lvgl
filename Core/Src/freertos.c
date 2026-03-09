@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "SEGGER_RTT.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -114,10 +114,13 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
+  // 外设初始化
+  
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    SEGGER_RTT_printf(0, "1 Second Passed in %s.\r\n", __FUNCTION__);
+    osDelay(1000);
   }
   /* USER CODE END StartDefaultTask */
 }
