@@ -18,10 +18,10 @@ void DEV_SetBacklight(UWORD Value)
 {
 	
 #ifdef USE_BCM2835_LIB
-    bcm2835_pwm_set_data(0,Value);
+    // bcm2835_pwm_set_data(0,Value); 
     
 #elif USE_WIRINGPI_LIB
-    pwmWrite(LCD_BL,Value);
+    // pwmWrite(LCD_BL,Value); 
     
 #endif
 	
