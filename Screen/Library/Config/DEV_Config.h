@@ -14,9 +14,11 @@
 
 #include "Debug.h"
 
-#include "stm32f4xx_hal_spi.h"
-#include "stm32f4xx_hal_i2c.h"
-#include "stm32f4xx_hal_gpio.h"
+// hal库默认在main.h中包含了spi、i2c、gpio、tim的头文件
+// #include "stm32f4xx_hal_spi.h"
+// #include "stm32f4xx_hal_i2c.h"
+// #include "stm32f4xx_hal_gpio.h"
+// #include "stm32f4xx_hal_tim.h"
 #include "main.h"
 
 #include <unistd.h>
@@ -57,8 +59,8 @@
 #define LCD_DC_0		HAL_GPIO_WritePin(LCD_DC_GPIO_Port, LCD_DC_Pin, GPIO_PIN_RESET)
 #define LCD_DC_1		HAL_GPIO_WritePin(LCD_DC_GPIO_Port, LCD_DC_Pin, GPIO_PIN_SET)
 
-#define LCD_BL_0		HAL_GPIO_WritePin(LCD_BL_GPIO_Port, LCD_BL_Pin, GPIO_PIN_RESET)
-#define LCD_BL_1		HAL_GPIO_WritePin(LCD_BL_GPIO_Port, LCD_BL_Pin, GPIO_PIN_SET)
+// #define LCD_BL_0		HAL_GPIO_WritePin(LCD_BL_GPIO_Port, LCD_BL_Pin, GPIO_PIN_RESET)
+// #define LCD_BL_1		HAL_GPIO_WritePin(LCD_BL_GPIO_Port, LCD_BL_Pin, GPIO_PIN_SET)
 
 #define TP_RST_0		HAL_GPIO_WritePin(TP_RST_GPIO_Port, TP_RST_Pin, GPIO_PIN_RESET)
 #define TP_RST_1		HAL_GPIO_WritePin(TP_RST_GPIO_Port, TP_RST_Pin, GPIO_PIN_SET)

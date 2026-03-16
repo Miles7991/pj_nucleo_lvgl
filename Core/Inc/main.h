@@ -31,7 +31,9 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "DEV_Config.h"
+#include "st7789.h"
+#include "cst816d.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -85,7 +87,7 @@ void Error_Handler(void);
 #define LCD_RST_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+#define ADDR_I2C_TOUCH 0x15
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

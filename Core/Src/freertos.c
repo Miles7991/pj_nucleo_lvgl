@@ -115,12 +115,30 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
   // 外设初始化
-  
+  touch_data_t touch_data;
+  if(DEV_ModuleInit() != 0)
+  {
+    SEGGER_RTT_printf(0, "DEV_ModuleInit failed.\r\n");
+    DEV_ModuleExit();
+  }
+  st7789_init();
+  cst816d_init();
+
+  st7789_clear(0XF800);
+  DEV_Delay_ms(1000);
+  st7789_clear(0X400);
+  DEV_Delay_ms(1000);
   /* Infinite loop */
   for(;;)
   {
-    SEGGER_RTT_printf(0, "1 Second Passed in %s.\r\n", __FUNCTION__);
-    osDelay(1000);
+    if (get_touch_data(&touch_data));
+    {
+      SEGGER_RTT_printf(0, "Touch Screen Detected\r\n");
+      // printf("x: %d, y: %d \r\n", touch_data.coords[0].x, touch_data.coords[0].y);
+      st7789_draw_rectangle(touch_data.coords[0].x, touch_data.coords[0].y, touch_data.coords[0].x + 10, touch_data.coords[0].y + 10, 0XF800);
+    }
+    DEV_Delay_ms(10);
+    // osDelay(1000);
   }
   /* USER CODE END StartDefaultTask */
 }

@@ -7,6 +7,9 @@ set(MX_Defines_Syms
 	STM32F411xE 
 	STM32_THREAD_SAFE_STRATEGY=4
     $<$<CONFIG:Debug>:DEBUG>
+
+    # add by hsy 
+    SCREENSTM
 )
 
 # STM32CubeMX generated include paths
@@ -100,8 +103,11 @@ set(MX_LINK_LIBS
     STM32_Drivers
     ${TOOLCHAIN_LINK_LIBRARIES}
     FreeRTOS
-	Screen
+	Screen          # add by hsy 
 )
+
+
+
 # Interface library for includes and symbols
 add_library(stm32cubemx INTERFACE)
 target_include_directories(stm32cubemx INTERFACE ${MX_Include_Dirs})

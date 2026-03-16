@@ -29,7 +29,7 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#define CYCLE_MAX 1000
 /* USER CODE END Includes */
 
 extern TIM_HandleTypeDef htim3;
