@@ -79,9 +79,10 @@ void cst816d_init(void)
     cst816d_read(CST816D_ID_REG, &id, 1);
     if (0 != id)
     {
-        DEBUG("cst816d id:%x\r\n", id);
+        LCD_DEBUG("cst816d id:%x\r\n", id);
     }
-    wiringPiISR(TP_INT,INT_EDGE_FALLING,&cst816d_touch_int_cb);
+    //wiringPiISR(TP_INT,INT_EDGE_FALLING,&cst816d_touch_int_cb);
+
     cst816d_int_enable = true;
 }
 

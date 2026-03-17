@@ -131,7 +131,7 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    if (get_touch_data(&touch_data));
+    if (get_touch_data(&touch_data))
     {
       SEGGER_RTT_printf(0, "Touch Screen Detected\r\n");
       // printf("x: %d, y: %d \r\n", touch_data.coords[0].x, touch_data.coords[0].y);
@@ -145,6 +145,18 @@ void StartDefaultTask(void *argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
-
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  static uint8_t brightness = 50;
+  if(GPIO_Pin == TP_INT_Pin)
+  {
+    cst816d_touch_int_cb();
+  }
+  else if(GPIO_Pin == B1_Pin)
+  {
+    SEGGER_RTT_WriteString(0, "B1_Pin pressed.\r\n");
+    DEV_SetBacklight(brightness);
+    brightness= (brightness+10)%100;
+  }
+}
 /* USER CODE END Application */
-

@@ -17,9 +17,9 @@
 
 #define USE_DEBUG 1
 #if USE_DEBUG
-	#define DEBUG(__info,...)  SEGGER_RTT_printf(0,"[Debug]: " __info,##__VA_ARGS__)
+	#define LCD_DEBUG(__info,...)  SEGGER_RTT_printf(0,"[Debug]: " __info,##__VA_ARGS__)
 #else
-	#define DEBUG(__info,...)  
+	#define LCD_DEBUG(__info,...)  
 #endif
 
 #endif//__DEBUG_H

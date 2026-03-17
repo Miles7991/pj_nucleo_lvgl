@@ -39,6 +39,6 @@ typedef struct{
 void cst816d_init(void);
 
 bool get_touch_data(touch_data_t *touch_data);
-
+void cst816d_touch_int_cb(void);
 
 #endif  // __CST816D_H__
