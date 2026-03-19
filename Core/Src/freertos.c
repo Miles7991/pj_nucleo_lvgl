@@ -26,6 +26,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "SEGGER_RTT.h"
+#include "GUI_Paint.h"
+#include "image.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -128,6 +130,8 @@ void StartDefaultTask(void *argument)
   DEV_Delay_ms(1000);
   st7789_clear(0X400);
   DEV_Delay_ms(1000);
+
+  testPic();
   /* Infinite loop */
   for(;;)
   {

@@ -35,6 +35,7 @@
 *
 ******************************************************************************/
 #include "GUI_Paint.h"
+#include "st7789.h"
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -761,9 +762,7 @@ void Paint_DrawBitMap(const unsigned char* image_buffer)
     }
 }
 
-
-/*
-void GUI_Partial_Refresh(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend)
+void Paint_Refresh(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend)
 {
     UWORD X0, Y0, X1, Y1;
     switch(Paint.Rotate) {
@@ -791,7 +790,13 @@ void GUI_Partial_Refresh(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend)
         X1 = Paint.HeightMemory - Ystart ;
         Y1 = Paint.HeightMemory - Yend ;
         break;
+    default:
+        return;
     }
-    LCD_1in54_DisplayWindows(X0, Y0, X1, Y1, Paint.Image);
+    st7789_flush(X0, Y0, X1, Y1, Paint.Image);
 }
-*/
+
+void Paint_RefreshAll(void)
+{
+    st7789_flush(0, 0, Paint.Width - 1, Paint.Height - 1, Paint.Image);
+}

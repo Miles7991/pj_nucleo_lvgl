@@ -47,7 +47,8 @@ set(MX_Application_Src
     #Segger print
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/SEGGER_RTT.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/SEGGER_RTT_printf.c
-    #
+    # Demo Image
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/image.c
 )
 
 # STM32 HAL/LL Drivers
