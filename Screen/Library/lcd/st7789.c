@@ -155,14 +155,22 @@ void st7789_set_windows(uint16_t x_start, uint16_t y_start, uint16_t x_end, uint
 
 void st7789_draw_rectangle(uint16_t x_start, uint16_t y_start, uint16_t x_end, uint16_t y_end, uint16_t color)
 {
-    uint8_t color_h = color >> 8;
-    uint8_t color_l = (uint8_t)(color && 0x00ff);
-    uint16_t i = 0;
-    uint16_t color_lenght = (1 + x_end - x_start) * (1 + y_end - y_start);
+    uint16_t width = x_end - x_start + 1;
+    uint16_t height = y_end - y_start + 1;
+    uint16_t buf[width * 2]; // 每个像素2字节
+    uint16_t i, j;
+    
+    // 填充缓冲区
+    for (i = 0; i < width; i++) {
+        buf[i * 2] = color >> 8;     // 高8位
+        buf[i * 2 + 1] = color & 0xFF; // 低8位
+    }
+    
     st7789_set_windows(x_start, y_start, x_end, y_end);
-    for (i = 0; i < color_lenght; i++){
-        st7789_write_byte(color_h);
-        st7789_write_byte(color_l);
+    
+    // 逐行发送数据
+    for (i = 0; i < height; i++) {
+        st7789_write_bytes((uint8_t *)buf, width * 2);
     }
 }
 
@@ -192,16 +200,29 @@ uint16_t swap_uint16(uint16_t val) {
 void st7789_clear(uint16_t color)
 {
     
-    uint16_t buf[ST7789_WIDTH];
-    uint16_t i;
+    uint16_t buf[ST7789_WIDTH * BATCH_LINES];
+    uint16_t i, j;
     color = swap_uint16(color);
-    for (i = 0; i < ST7789_WIDTH; i++)
+    
+    // 填充缓冲区
+    for (i = 0; i < ST7789_WIDTH * BATCH_LINES; i++)
         buf[i] = color;
 
     st7789_set_windows(0, 0, ST7789_WIDTH - 1, ST7789_HEIGHT - 1);
 
-    for (i = 0; i < ST7789_HEIGHT; i++)
-        st7789_write_bytes((uint8_t *)buf ,ST7789_WIDTH * 2);
+    // 批量写入数据
+    uint16_t total_batches = ST7789_HEIGHT / BATCH_LINES;
+    uint16_t remaining_lines = ST7789_HEIGHT % BATCH_LINES;
+    
+    // 写入完整的批次
+    for (i = 0; i < total_batches; i++) {
+        st7789_write_bytes((uint8_t *)buf, ST7789_WIDTH * 2 * BATCH_LINES);
+    }
+    
+    // 写入剩余的行数
+    if (remaining_lines > 0) {
+        st7789_write_bytes((uint8_t *)buf, ST7789_WIDTH * 2 * remaining_lines);
+    }
 }
 
 
@@ -215,21 +236,16 @@ int testPic(void)
     int image_height = 150;
     int x_start = (ST7789_WIDTH - image_width) / 2;
     int y_start = (ST7789_HEIGHT - image_height) / 2;
+    int line_size = image_width * 2; // 每行字节数
     
     // 显示 gImage_up
     SEGGER_RTT_WriteString(0, "Displaying gImage_up...\r\n");
     st7789_set_windows(x_start, y_start, x_start + image_width - 1, y_start + image_height - 1);
     
-    // 直接发送图像数据到屏幕
+    // 逐行发送图像数据到屏幕
     for (int i = 0; i < image_height; i++) {
-        for (int j = 0; j < image_width; j++) {
-            // 从 gImage_up 数组中获取像素数据（数组是 8 位颜色格式，每个像素占 2 字节）
-            int index = (i * image_width + j) * 2;
-            uint8_t color_h = gImage_up[index];
-            uint8_t color_l = gImage_up[index + 1];
-            st7789_write_byte(color_h);
-            st7789_write_byte(color_l);
-        }
+        int index = i * line_size;
+        st7789_write_bytes(&gImage_up[index], line_size);
     }
     
     DEV_Delay_ms(2000); // 显示2秒
@@ -238,16 +254,10 @@ int testPic(void)
     SEGGER_RTT_WriteString(0, "Displaying gImage_down...\r\n");
     st7789_set_windows(x_start, y_start, x_start + image_width - 1, y_start + image_height - 1);
     
-    // 直接发送图像数据到屏幕
+    // 逐行发送图像数据到屏幕
     for (int i = 0; i < image_height; i++) {
-        for (int j = 0; j < image_width; j++) {
-            // 从 gImage_down 数组中获取像素数据（数组是 8 位颜色格式，每个像素占 2 字节）
-            int index = (i * image_width + j) * 2;
-            uint8_t color_h = gImage_down[index];
-            uint8_t color_l = gImage_down[index + 1];
-            st7789_write_byte(color_h);
-            st7789_write_byte(color_l);
-        }
+        int index = i * line_size;
+        st7789_write_bytes(&gImage_down[index], line_size);
     }
     
     DEV_Delay_ms(2000); // 显示2秒
@@ -256,16 +266,10 @@ int testPic(void)
     SEGGER_RTT_WriteString(0, "Displaying gImage_right...\r\n");
     st7789_set_windows(x_start, y_start, x_start + image_width - 1, y_start + image_height - 1);
     
-    // 直接发送图像数据到屏幕
+    // 逐行发送图像数据到屏幕
     for (int i = 0; i < image_height; i++) {
-        for (int j = 0; j < image_width; j++) {
-            // 从 gImage_right 数组中获取像素数据（数组是 8 位颜色格式，每个像素占 2 字节）
-            int index = (i * image_width + j) * 2;
-            uint8_t color_h = gImage_right[index];
-            uint8_t color_l = gImage_right[index + 1];
-            st7789_write_byte(color_h);
-            st7789_write_byte(color_l);
-        }
+        int index = i * line_size;
+        st7789_write_bytes(&gImage_right[index], line_size);
     }
     
     DEV_Delay_ms(2000); // 显示2秒
@@ -274,16 +278,10 @@ int testPic(void)
     SEGGER_RTT_WriteString(0, "Displaying gImage_left...\r\n");
     st7789_set_windows(x_start, y_start, x_start + image_width - 1, y_start + image_height - 1);
     
-    // 直接发送图像数据到屏幕
+    // 逐行发送图像数据到屏幕
     for (int i = 0; i < image_height; i++) {
-        for (int j = 0; j < image_width; j++) {
-            // 从 gImage_left 数组中获取像素数据（数组是 8 位颜色格式，每个像素占 2 字节）
-            int index = (i * image_width + j) * 2;
-            uint8_t color_h = gImage_left[index];
-            uint8_t color_l = gImage_left[index + 1];
-            st7789_write_byte(color_h);
-            st7789_write_byte(color_l);
-        }
+        int index = i * line_size;
+        st7789_write_bytes(&gImage_left[index], line_size);
     }
     
     DEV_Delay_ms(2000); // 显示2秒
@@ -292,16 +290,10 @@ int testPic(void)
     SEGGER_RTT_WriteString(0, "Displaying gImage_long_press...\r\n");
     st7789_set_windows(x_start, y_start, x_start + image_width - 1, y_start + image_height - 1);
     
-    // 直接发送图像数据到屏幕
+    // 逐行发送图像数据到屏幕
     for (int i = 0; i < image_height; i++) {
-        for (int j = 0; j < image_width; j++) {
-            // 从 gImage_long_press 数组中获取像素数据（数组是 8 位颜色格式，每个像素占 2 字节）
-            int index = (i * image_width + j) * 2;
-            uint8_t color_h = gImage_long_press[index];
-            uint8_t color_l = gImage_long_press[index + 1];
-            st7789_write_byte(color_h);
-            st7789_write_byte(color_l);
-        }
+        int index = i * line_size;
+        st7789_write_bytes(&gImage_long_press[index], line_size);
     }
     
     DEV_Delay_ms(2000); // 显示2秒
@@ -310,16 +302,10 @@ int testPic(void)
     SEGGER_RTT_WriteString(0, "Displaying gImage_double_click...\r\n");
     st7789_set_windows(x_start, y_start, x_start + image_width - 1, y_start + image_height - 1);
     
-    // 直接发送图像数据到屏幕
+    // 逐行发送图像数据到屏幕
     for (int i = 0; i < image_height; i++) {
-        for (int j = 0; j < image_width; j++) {
-            // 从 gImage_double_click 数组中获取像素数据（数组是 8 位颜色格式，每个像素占 2 字节）
-            int index = (i * image_width + j) * 2;
-            uint8_t color_h = gImage_double_click[index];
-            uint8_t color_l = gImage_double_click[index + 1];
-            st7789_write_byte(color_h);
-            st7789_write_byte(color_l);
-        }
+        int index = i * line_size;
+        st7789_write_bytes(&gImage_double_click[index], line_size);
     }
     
     DEV_Delay_ms(2000); // 显示2秒

@@ -27,6 +27,7 @@ set(MX_Include_Dirs
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/Library/Fonts
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/Library/GUI
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/Library/lcd
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/lvgl
 )
 
 # STM32CubeMX generated application sources
@@ -34,6 +35,7 @@ set(MX_Application_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/main.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/gpio.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/freertos.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/dma.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/i2c.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/spi.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/tim.c
@@ -99,12 +101,16 @@ set(MX_LINK_DIRS
 # LCD Screen Library sources
 file(GLOB_RECURSE SCREEN_LIBRARY_SRC "${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/Library/*.c" )
 
+# LVGL Library sources
+file(GLOB_RECURSE LVGL_LIBRARY_SRC "${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/lvgl/*.c" )
+
 # Project static libraries
 set(MX_LINK_LIBS 
     STM32_Drivers
     ${TOOLCHAIN_LINK_LIBRARIES}
     FreeRTOS
 	Screen          # add by hsy 
+	lvgl            # add by hsy 
 )
 
 
@@ -130,6 +136,11 @@ target_link_libraries(FreeRTOS PUBLIC stm32cubemx)
 add_library(Screen OBJECT)
 target_sources(Screen PRIVATE ${SCREEN_LIBRARY_SRC})
 target_link_libraries(Screen PUBLIC stm32cubemx)
+
+# Add by hsy for LVGL
+add_library(lvgl OBJECT)
+target_sources(lvgl PRIVATE ${LVGL_LIBRARY_SRC})
+target_link_libraries(lvgl PUBLIC stm32cubemx)
 
 # Add STM32CubeMX generated application sources to the project
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE ${MX_Application_Src})

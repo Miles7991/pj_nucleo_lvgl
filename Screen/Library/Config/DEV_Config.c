@@ -88,7 +88,10 @@ UBYTE DEV_ModuleInit(void)
 void DEV_SPI_WriteByte(uint8_t Value)
 {
     LCD_CS_0;
-    HAL_SPI_Transmit(&hspi2, &Value, 1, HAL_MAX_DELAY);
+    // HAL_SPI_Transmit(&hspi2, &Value, 1, HAL_MAX_DELAY);
+    HAL_SPI_Transmit_DMA(&hspi2, &Value, 1);
+    // 等待DMA传输完成
+    while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
     LCD_CS_1;
 }
 
@@ -96,7 +99,10 @@ void DEV_SPI_Write_nByte(uint8_t *pData, uint32_t Len)
 {
     // 发送数据 记得先拉低CS
     LCD_CS_0;
-    HAL_SPI_Transmit(&hspi2, pData, Len, HAL_MAX_DELAY);
+    // HAL_SPI_Transmit(&hspi2, pData, Len, HAL_MAX_DELAY);
+    HAL_SPI_Transmit_DMA(&hspi2, pData, Len);
+    // 等待DMA传输完成
+    while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
     LCD_CS_1;
 }
 
