@@ -217,5 +217,18 @@ void EXTI15_10_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  static uint8_t brightness = 50;
+  if(GPIO_Pin == TP_INT_Pin)
+  {
+    cst816d_touch_int_cb();
+  }
+  else if(GPIO_Pin == B1_Pin)
+  {
+    SEGGER_RTT_WriteString(0, "B1_Pin pressed.\r\n");
+    DEV_SetBacklight(brightness);
+    brightness= (brightness+10)%100;
+  }
+}
 /* USER CODE END 1 */
