@@ -22,15 +22,12 @@ set(MX_Include_Dirs
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Drivers/CMSIS/Device/ST/STM32F4xx/Include
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Drivers/CMSIS/Include
-    # Add by Hsy for RTT
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../RTT
     # Add by Hsy for LCD
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/Library/Config
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/Library/Fonts
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/Library/GUI
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/Library/lcd
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/lvgl
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../Screen/lvgl/examples
 )
 
 # STM32CubeMX generated application sources
@@ -50,12 +47,10 @@ set(MX_Application_Src
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/syscalls.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../startup_stm32f411xe.s
     #Segger print
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../RTT/SEGGER_RTT.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../RTT/SEGGER_RTT_printf.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/SEGGER_RTT.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/SEGGER_RTT_printf.c
     # Demo Image
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/image.c
-    # Add by Hsy for LCD
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/lcd.c
 )
 
 # STM32 HAL/LL Drivers

@@ -793,10 +793,10 @@ void Paint_Refresh(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend)
     default:
         return;
     }
-    // st7789_flush(X0, Y0, X1, Y1, Paint.Image);
+    st7789_flush(X0, Y0, X1, Y1, Paint.Image);
 }
 
-// void Paint_RefreshAll(void)
-// {
-//     st7789_flush(0, 0, Paint.Width - 1, Paint.Height - 1, Paint.Image);
-// }
+void Paint_RefreshAll(void)
+{
+    st7789_flush(0, 0, Paint.Width - 1, Paint.Height - 1, Paint.Image);
+}

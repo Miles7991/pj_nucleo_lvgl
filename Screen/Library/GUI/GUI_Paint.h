@@ -169,6 +169,6 @@ void Paint_DrawTime(UWORD Xstart, UWORD Ystart, PAINT_TIME *pTime, sFONT* Font, 
 void Paint_DrawImage(const unsigned char *image,UWORD Startx, UWORD Starty,UWORD Endx, UWORD Endy); 
 
 //refresh
-// void Paint_Refresh(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend);
-// void Paint_RefreshAll(void);
+void Paint_Refresh(UWORD Xstart, UWORD Ystart, UWORD Xend, UWORD Yend);
+void Paint_RefreshAll(void);
 #endif

@@ -1,12 +1,12 @@
 #include "st7789.h"
 
-void st7789_write_bytes(uint8_t *data, uint32_t lenght)
+static void st7789_write_bytes(uint8_t *data, uint32_t lenght)
 {
     LCD_DC_1;
     DEV_SPI_Write_nByte(data, lenght);
 }
 
-void st7789_write_byte(uint8_t data)
+static void st7789_write_byte(uint8_t data)
 {
     LCD_DC_1;
     //LCD_2IN8_CS_0;
@@ -14,7 +14,7 @@ void st7789_write_byte(uint8_t data)
     //LCD_2IN8_CS_1;
 }
 
-void st7789_write_cmd(uint8_t cmd)
+static void st7789_write_cmd(uint8_t cmd)
 {
     LCD_DC_0;
     //LCD_2IN8_CS_0;
@@ -176,21 +176,21 @@ void st7789_draw_rectangle(uint16_t x_start, uint16_t y_start, uint16_t x_end, u
 
 void st7789_flush(uint16_t x_start, uint16_t y_start, uint16_t x_end, uint16_t y_end, uint16_t *color)
 {
-    // uint16_t i, j;
-    // uint16_t width = x_end - x_start + 1;
-    // uint16_t height = y_end - y_start + 1;
+    uint16_t i, j;
+    uint16_t width = x_end - x_start + 1;
+    uint16_t height = y_end - y_start + 1;
     
-    // st7789_set_windows(x_start, y_start, x_end, y_end);
+    st7789_set_windows(x_start, y_start, x_end, y_end);
     
-    // for (i = 0; i < height; i++) {
-    //     for (j = 0; j < width; j++) {
-    //         uint16_t pixel_color = color[i * width + j];
-    //         uint8_t color_h = pixel_color >> 8;
-    //         uint8_t color_l = (uint8_t)(pixel_color & 0x00ff);
-    //         st7789_write_byte(color_h);
-    //         st7789_write_byte(color_l);
-    //     }
-    // }
+    for (i = 0; i < height; i++) {
+        for (j = 0; j < width; j++) {
+            uint16_t pixel_color = color[i * width + j];
+            uint8_t color_h = pixel_color >> 8;
+            uint8_t color_l = (uint8_t)(pixel_color & 0x00ff);
+            st7789_write_byte(color_h);
+            st7789_write_byte(color_l);
+        }
+    }
 }
 
 uint16_t swap_uint16(uint16_t val) {
@@ -248,7 +248,7 @@ int testPic(void)
         st7789_write_bytes(&gImage_up[index], line_size);
     }
     
-    DEV_Delay_ms(500); // 显示2秒
+    DEV_Delay_ms(2000); // 显示2秒
     
     // 显示 gImage_down
     SEGGER_RTT_WriteString(0, "Displaying gImage_down...\r\n");
@@ -260,7 +260,7 @@ int testPic(void)
         st7789_write_bytes(&gImage_down[index], line_size);
     }
     
-    DEV_Delay_ms(500); // 显示2秒
+    DEV_Delay_ms(2000); // 显示2秒
     
     // 显示 gImage_right
     SEGGER_RTT_WriteString(0, "Displaying gImage_right...\r\n");
@@ -272,7 +272,7 @@ int testPic(void)
         st7789_write_bytes(&gImage_right[index], line_size);
     }
     
-    DEV_Delay_ms(500); // 显示2秒
+    DEV_Delay_ms(2000); // 显示2秒
     
     // 显示 gImage_left
     SEGGER_RTT_WriteString(0, "Displaying gImage_left...\r\n");
@@ -284,7 +284,7 @@ int testPic(void)
         st7789_write_bytes(&gImage_left[index], line_size);
     }
     
-    DEV_Delay_ms(500); // 显示2秒
+    DEV_Delay_ms(2000); // 显示2秒
     
     // 显示 gImage_long_press
     SEGGER_RTT_WriteString(0, "Displaying gImage_long_press...\r\n");
@@ -296,7 +296,7 @@ int testPic(void)
         st7789_write_bytes(&gImage_long_press[index], line_size);
     }
     
-    DEV_Delay_ms(500); // 显示2秒
+    DEV_Delay_ms(2000); // 显示2秒
     
     // 显示 gImage_double_click
     SEGGER_RTT_WriteString(0, "Displaying gImage_double_click...\r\n");
@@ -308,7 +308,7 @@ int testPic(void)
         st7789_write_bytes(&gImage_double_click[index], line_size);
     }
     
-    DEV_Delay_ms(500); // 显示2秒
+    DEV_Delay_ms(2000); // 显示2秒
     
     return 0;
 }
