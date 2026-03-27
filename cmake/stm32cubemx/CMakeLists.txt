@@ -52,8 +52,6 @@ set(MX_Application_Src
     #Segger print
     ${CMAKE_CURRENT_SOURCE_DIR}/../../RTT/SEGGER_RTT.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../../RTT/SEGGER_RTT_printf.c
-    # Demo Image
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/image.c
     # Add by Hsy for LCD
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Core/Src/lcd.c
 )

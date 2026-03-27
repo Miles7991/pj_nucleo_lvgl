@@ -27,7 +27,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "SEGGER_RTT.h"
-#include "image.h"
 #include "lcd.h"
 /* USER CODE END Includes */
 
@@ -149,7 +148,6 @@ void StartLvglTask(void *argument)
   DEV_Delay_ms(500);
   st7789_clear(0X400);
   DEV_Delay_ms(500);
-  testPic();
   st7789_clear(0xFFFF);
   
   // lvgl init
