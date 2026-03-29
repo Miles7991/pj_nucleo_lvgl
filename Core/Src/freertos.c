@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
+#include "src/misc/lv_color.h"
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
@@ -141,18 +142,20 @@ void StartLvglTask(void *argument)
     SEGGER_RTT_printf(0, "DEV_ModuleInit failed.\r\n");
     DEV_ModuleExit();
   }
-  st7789_init();
+  // st7789_init();
   cst816d_init();
 
-  st7789_clear(0XF800);
-  DEV_Delay_ms(500);
-  st7789_clear(0X400);
-  DEV_Delay_ms(500);
-  st7789_clear(0xFFFF);
+  // st7789_clear(0XF800);
+  // DEV_Delay_ms(500);
+  // st7789_clear(0X400);
+  // DEV_Delay_ms(500);
+  // st7789_clear(0xFFFF);
   
   // lvgl init
   lv_log_register_print_cb(my_print);
   lv_init();
+  // lv_init 会清除 lv_log_register_print_cb 的 cb 需要再次注册 my_print
+  lv_log_register_print_cb(my_print);
   lv_tick_set_cb(HAL_GetTick);
   lv_port_display_init();
 
@@ -166,7 +169,7 @@ void StartLvglTask(void *argument)
   lv_obj_t * scr = lv_scr_act();
   
   // 设置屏幕背景（可选）
-  lv_obj_set_style_bg_color(scr, lv_palette_main(LV_PALETTE_NONE), 0);
+  lv_obj_set_style_bg_color(scr, lv_color_white(), 0);
   
   // 创建标签
   lv_obj_t * label = lv_label_create(scr);
@@ -182,23 +185,34 @@ void StartLvglTask(void *argument)
   lv_obj_set_style_text_color(label1, lv_palette_main(LV_PALETTE_BLUE), 0); 
   lv_obj_set_pos(label1, 100, 100);
   
-  // 创建红色方块 (用标签模拟)
-  lv_obj_t * test_rect = lv_label_create(scr);
-  lv_label_set_text(test_rect, ""); // 无文字
+  // // 创建红色方块 (用标签模拟)
+  // lv_obj_t * test_rect = lv_label_create(scr);
+  // lv_label_set_text(test_rect, "Why?"); // 无文字
+  // lv_obj_set_size(test_rect, 50, 50);
+  // lv_obj_set_style_bg_color(test_rect, lv_color_hex(0xFF0000), 0);
+  // lv_obj_set_style_bg_opa(test_rect, LV_OPA_COVER, 0);
+  // lv_obj_align(test_rect, LV_ALIGN_TOP_LEFT, 0, 0);
+  
+  // // 创建黄色方块 (用标签模拟)
+  // lv_obj_t * test_rect1 = lv_label_create(scr);
+  // lv_label_set_text(test_rect1, "Fuck"); // 无文字
+  // lv_obj_set_size(test_rect1, 50, 50);
+  // lv_obj_set_style_bg_color(test_rect1, lv_color_hex(0xFFFF00), 0);
+  // lv_obj_set_style_bg_opa(test_rect1, LV_OPA_COVER, 0);
+  // lv_obj_align(test_rect1, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
+  // 创建红色方块
+  lv_obj_t * test_rect = lv_obj_create(scr);
   lv_obj_set_size(test_rect, 50, 50);
-  lv_obj_set_style_bg_color(test_rect, lv_color_hex(0xFF0000), 0);
+  lv_obj_set_style_bg_color(test_rect, lv_palette_main(LV_PALETTE_RED), 0);
   lv_obj_set_style_bg_opa(test_rect, LV_OPA_COVER, 0);
   lv_obj_align(test_rect, LV_ALIGN_TOP_LEFT, 0, 0);
   
-  // 创建黄色方块 (用标签模拟)
-  lv_obj_t * test_rect1 = lv_label_create(scr);
-  lv_label_set_text(test_rect1, ""); // 无文字
+  // 创建黄色方块
+  lv_obj_t * test_rect1 = lv_obj_create(scr);
   lv_obj_set_size(test_rect1, 50, 50);
-  lv_obj_set_style_bg_color(test_rect1, lv_color_hex(0xFFFF00), 0);
+  lv_obj_set_style_bg_color(test_rect1, lv_palette_main(LV_PALETTE_BLUE), 0);
   lv_obj_set_style_bg_opa(test_rect1, LV_OPA_COVER, 0);
   lv_obj_align(test_rect1, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
-  
-
 
   
 
@@ -230,26 +244,28 @@ osStatus_t osThreadDetach (osThreadId_t thread_id)
 
 void my_print(lv_log_level_t level, const char * buf)
 {
+    if(__get_IPSR() != 0) return;  // 防止ISR调用
+
+    const char * color;
+    const char * tag;
+
     switch(level) {
-        case LV_LOG_LEVEL_TRACE:
-            SEGGER_RTT_printf(0, "\x1B[90m[TRACE]\x1B[0m %s", buf);  // 灰色
-            break;
-        case LV_LOG_LEVEL_INFO:
-            SEGGER_RTT_printf(0, "\x1B[32m[INFO]\x1B[0m %s", buf);   // 绿色
-            break;
-        case LV_LOG_LEVEL_WARN:
-            SEGGER_RTT_printf(0, "\x1B[33m[WARN]\x1B[0m %s", buf);   // 黄色
-            break;
-        case LV_LOG_LEVEL_ERROR:
-            SEGGER_RTT_printf(0, "\x1B[31m[ERROR]\x1B[0m %s", buf);  // 红色
-            break;
-        case LV_LOG_LEVEL_USER:
-            SEGGER_RTT_printf(0, "\x1B[36m[USER]\x1B[0m %s", buf);   // 青色
-            break;
-        default:
-            SEGGER_RTT_printf(0, "[UNKNOWN] %s", buf);
-            break;
+        case LV_LOG_LEVEL_TRACE: color = "\x1B[90m"; tag = "[TRACE]"; break;
+        case LV_LOG_LEVEL_INFO:  color = "\x1B[32m"; tag = "[INFO]";  break;
+        case LV_LOG_LEVEL_WARN:  color = "\x1B[33m"; tag = "[WARN]";  break;
+        case LV_LOG_LEVEL_ERROR: color = "\x1B[31m"; tag = "[ERROR]"; break;
+        case LV_LOG_LEVEL_USER:  color = "\x1B[36m"; tag = "[USER]";  break;
+        default: color = ""; tag = "[UNK]"; break;
     }
+
+    SEGGER_RTT_printf(0, "%s%s\x1B[0m %s", color, tag, buf);
 }
+
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
+{
+    SEGGER_RTT_printf(0, "Stack overflow: %s\n", pcTaskName);
+    while(1);
+}
+
 /* USER CODE END Application */
 
