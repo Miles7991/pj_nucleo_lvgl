@@ -8,37 +8,31 @@
 #include "SEGGER_RTT.h"
 
 static lv_display_t * lcd_disp;
+static volatile bool disp_flush_enabled = true;
 
-/* Send short command to the LCD. This function shall wait until the transaction finishes. */
-void my_lcd_send_cmd(lv_display_t *disp, const uint8_t *cmd, size_t cmd_size, const uint8_t *param, size_t param_size)
-{
-    //send cmd
-    for(int i = 0; i < cmd_size; i++)
-    {
-        st7789_write_cmd(cmd[i]);
-    }
-    //send data
-    st7789_write_bytes(param, param_size);
-}
 
-/* Send large array of pixel data to the LCD. If necessary, this function has to
- * do the byte-swapping. This function can do the transfer in the background. */
-void my_lcd_send_color(lv_display_t *disp, const uint8_t *cmd, size_t cmd_size, uint8_t *param, size_t param_size)
+
+// 刷新显示
+static void disp_flush(lv_display_t * disp_drv, const lv_area_t * area, uint8_t * px_map)
 {
-    for(int i = 0; i < cmd_size; i++)
-    {
-        st7789_write_cmd(cmd[i]);
+    if(disp_flush_enabled) {
+        /* Use the driver function to flush the buffer */
+        st7789_flush(area->x1, area->y1, area->x2, area->y2, (uint16_t *)px_map);
     }
-    st7789_write_bytes(param, param_size);
-    lv_display_flush_ready(disp);
+
+    /* IMPORTANT!!!
+     * Inform the graphics library that you are ready with the flushing */
+    lv_display_flush_ready(disp_drv);
 }
 
 void lv_port_display_init(void)
 {
 
     /* Create the LVGL display object and the ST7789 LCD display driver */
-    lcd_disp = lv_st7789_create(ST7789_WIDTH, ST7789_HEIGHT, LV_LCD_FLAG_NONE, my_lcd_send_cmd, my_lcd_send_color);
-    lv_display_set_rotation(lcd_disp, LV_DISPLAY_ROTATION_0);     /* set landscape orientation */
+    lcd_disp = lv_display_create(ST7789_WIDTH, ST7789_HEIGHT);
+    lv_display_set_color_format(lcd_disp, LV_COLOR_FORMAT_RGB565_SWAPPED);
+    lv_display_set_flush_cb(lcd_disp, disp_flush);
+	lv_display_set_rotation(lcd_disp, LV_DISPLAY_ROTATION_0);
 
     /* Example: two dynamically allocated buffers for partial rendering */
     uint8_t * buf1 = NULL;

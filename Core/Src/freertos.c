@@ -145,11 +145,11 @@ void StartLvglTask(void *argument)
   st7789_init();
   cst816d_init();
 
-  // st7789_clear(0XF800);
-  // DEV_Delay_ms(500);
-  // st7789_clear(0X400);
-  // DEV_Delay_ms(500);
-  // st7789_clear(0xFFFF);
+  st7789_clear(0XF800);
+  DEV_Delay_ms(500);
+  st7789_clear(0X400);
+  DEV_Delay_ms(500);
+  st7789_clear(0xFFFF);
   
   // lvgl init
   lv_log_register_print_cb(my_print);
@@ -167,7 +167,6 @@ void StartLvglTask(void *argument)
 
 // 获取当前屏幕
   lv_obj_t * scr = lv_scr_act();
-  
   // 设置屏幕背景（可选）
   lv_obj_set_style_bg_color(scr, lv_color_white(), 0);
   
@@ -185,21 +184,6 @@ void StartLvglTask(void *argument)
   lv_obj_set_style_text_color(label1, lv_palette_main(LV_PALETTE_BLUE), 0); 
   lv_obj_set_pos(label1, 100, 100);
   
-  // // 创建红色方块 (用标签模拟)
-  // lv_obj_t * test_rect = lv_label_create(scr);
-  // lv_label_set_text(test_rect, "Why?"); // 无文字
-  // lv_obj_set_size(test_rect, 50, 50);
-  // lv_obj_set_style_bg_color(test_rect, lv_color_hex(0xFF0000), 0);
-  // lv_obj_set_style_bg_opa(test_rect, LV_OPA_COVER, 0);
-  // lv_obj_align(test_rect, LV_ALIGN_TOP_LEFT, 0, 0);
-  
-  // // 创建黄色方块 (用标签模拟)
-  // lv_obj_t * test_rect1 = lv_label_create(scr);
-  // lv_label_set_text(test_rect1, "Fuck"); // 无文字
-  // lv_obj_set_size(test_rect1, 50, 50);
-  // lv_obj_set_style_bg_color(test_rect1, lv_color_hex(0xFFFF00), 0);
-  // lv_obj_set_style_bg_opa(test_rect1, LV_OPA_COVER, 0);
-  // lv_obj_align(test_rect1, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
   // 创建红色方块
   lv_obj_t * test_rect = lv_obj_create(scr);
   lv_obj_set_size(test_rect, 50, 50);
@@ -210,10 +194,9 @@ void StartLvglTask(void *argument)
   // 创建黄色方块
   lv_obj_t * test_rect1 = lv_obj_create(scr);
   lv_obj_set_size(test_rect1, 50, 50);
-  lv_obj_set_style_bg_color(test_rect1, lv_palette_main(LV_PALETTE_BLUE), 0);
+  lv_obj_set_style_bg_color(test_rect1, lv_palette_main(LV_PALETTE_YELLOW), 0);
   lv_obj_set_style_bg_opa(test_rect1, LV_OPA_COVER, 0);
   lv_obj_align(test_rect1, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
-
   
 
 

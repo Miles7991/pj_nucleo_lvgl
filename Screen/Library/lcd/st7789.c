@@ -44,7 +44,7 @@ void st7789_init(void)
     DEV_Delay_ms(120);                //DEV_Delay_ms 120ms
 
     st7789_write_cmd(0x36);     // Memory Data Access Control MY,MX~~
-    st7789_write_byte(0x48);   
+    st7789_write_byte(0x48);   // Set to 0x48 for BGR, or 0x40 for RGB order (if Red/Blue swapped)
 
     st7789_write_cmd(0x3A);     
     st7789_write_byte(0x05);   //st7789_write_byte(0x66);
@@ -176,21 +176,12 @@ void st7789_draw_rectangle(uint16_t x_start, uint16_t y_start, uint16_t x_end, u
 
 void st7789_flush(uint16_t x_start, uint16_t y_start, uint16_t x_end, uint16_t y_end, uint16_t *color)
 {
-    // uint16_t i, j;
-    // uint16_t width = x_end - x_start + 1;
-    // uint16_t height = y_end - y_start + 1;
-    
-    // st7789_set_windows(x_start, y_start, x_end, y_end);
-    
-    // for (i = 0; i < height; i++) {
-    //     for (j = 0; j < width; j++) {
-    //         uint16_t pixel_color = color[i * width + j];
-    //         uint8_t color_h = pixel_color >> 8;
-    //         uint8_t color_l = (uint8_t)(pixel_color & 0x00ff);
-    //         st7789_write_byte(color_h);
-    //         st7789_write_byte(color_l);
-    //     }
-    // }
+    uint32_t width = x_end - x_start + 1;
+    uint32_t height = y_end - y_start + 1;
+    uint32_t size = width * height * 2;
+
+    st7789_set_windows(x_start, y_start, x_end, y_end);
+    st7789_write_bytes((uint8_t *)color, size);
 }
 
 uint16_t swap_uint16(uint16_t val) {
