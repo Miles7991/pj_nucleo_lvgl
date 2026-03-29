@@ -142,7 +142,7 @@ void StartLvglTask(void *argument)
     SEGGER_RTT_printf(0, "DEV_ModuleInit failed.\r\n");
     DEV_ModuleExit();
   }
-  // st7789_init();
+  st7789_init();
   cst816d_init();
 
   // st7789_clear(0XF800);
