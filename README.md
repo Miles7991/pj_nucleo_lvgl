@@ -14,3 +14,4 @@ my first try of lvgl on nucleo
 
 5. 打开触摸屏，写按钮的Event回调函数
 6. 使用SPI中断模式
+7. button 加入 Event callback

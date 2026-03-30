@@ -142,14 +142,6 @@ void StartLvglTask(void *argument)
     SEGGER_RTT_printf(0, "DEV_ModuleInit failed.\r\n");
     DEV_ModuleExit();
   }
-  st7789_init();
-  cst816d_init();
-
-  st7789_clear(0XF800);
-  DEV_Delay_ms(500);
-  st7789_clear(0X400);
-  DEV_Delay_ms(500);
-  st7789_clear(0xFFFF);
   
   // lvgl init
   lv_log_register_print_cb(my_print);
@@ -159,7 +151,11 @@ void StartLvglTask(void *argument)
   lv_tick_set_cb(HAL_GetTick);
   lv_port_display_init();
 
-
+  st7789_clear(0XF800);
+  DEV_Delay_ms(500);
+  st7789_clear(0X400);
+  DEV_Delay_ms(500);
+  st7789_clear(0xFFFF);
 
   // lv_port_indev_init();
 

@@ -27,7 +27,8 @@ static void disp_flush(lv_display_t * disp_drv, const lv_area_t * area, uint8_t 
 
 void lv_port_display_init(void)
 {
-
+    // 初始化显示
+    st7789_init();
     /* Create the LVGL display object and the ST7789 LCD display driver */
     lcd_disp = lv_display_create(ST7789_WIDTH, ST7789_HEIGHT);
     lv_display_set_color_format(lcd_disp, LV_COLOR_FORMAT_RGB565_SWAPPED);
