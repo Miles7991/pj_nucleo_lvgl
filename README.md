@@ -10,6 +10,7 @@ my first try of lvgl on nucleo
     - 加上 lv_display_set_color_format(lcd_disp, LV_COLOR_FORMAT_RGB565_SWAPPED);
     - 打开 #define LV_DRAW_SW_SUPPORT_RGB565_SWAPPED         1   
     - 不使用原生的 lcd_st7789 ，而是使用自定义的 disp_flush 函数。
-4. 使用SPI中断模式
-5. 使用FreeRTOS模式运行LVGL
-6. 打开触摸屏，写按钮的Event回调函数
+4. 使用FreeRTOS模式运行LVGL： 选择 #define LV_USE_OS   LV_OS_FREERTOS，不要选择 LV_OS_CMSIS_RTOS2
+
+5. 打开触摸屏，写按钮的Event回调函数
+6. 使用SPI中断模式

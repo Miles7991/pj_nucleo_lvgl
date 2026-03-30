@@ -198,7 +198,15 @@ void StartLvglTask(void *argument)
   lv_obj_set_style_bg_opa(test_rect1, LV_OPA_COVER, 0);
   lv_obj_align(test_rect1, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
   
+  lv_obj_t * btn = lv_button_create(lv_screen_active());     /*Add a button the current screen*/
+  // lv_obj_set_pos(btn, 10, 10);                            /*Set its position*/
+  lv_obj_align(btn, LV_ALIGN_BOTTOM_LEFT, 10,   -10);
+  lv_obj_set_size(btn, 120, 50);                          /*Set its size*/
+  // lv_obj_add_event_cb(btn, btn_event_cb, LV_EVENT_ALL, NULL);           /*Assign a callback to the button*/
 
+  lv_obj_t * bntlabel = lv_label_create(btn);          /*Add a label to the button*/
+  lv_label_set_text(bntlabel, "Button");                     /*Set the labels text*/
+  lv_obj_center(bntlabel);
 
 
   /* Infinite loop */
@@ -217,12 +225,6 @@ void StartLvglTask(void *argument)
     osDelay(2);
 
   }
-}
-
-osStatus_t osThreadDetach (osThreadId_t thread_id)
-{
-    (void)thread_id;
-    return osOK;
 }
 
 void my_print(lv_log_level_t level, const char * buf)
