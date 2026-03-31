@@ -28,6 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include "SEGGER_RTT.h"
 #include "lcd.h"
+#include "touchpad.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,6 +44,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 void my_print(lv_log_level_t level, const char * buf);
+static void btn_event_cb(lv_event_t * e);
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -157,8 +159,8 @@ void StartLvglTask(void *argument)
   DEV_Delay_ms(500);
   st7789_clear(0xFFFF);
 
-  // lv_port_indev_init();
-
+  lv_port_indev_init();
+  
 
 
 // 获取当前屏幕
@@ -194,11 +196,12 @@ void StartLvglTask(void *argument)
   lv_obj_set_style_bg_opa(test_rect1, LV_OPA_COVER, 0);
   lv_obj_align(test_rect1, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
   
+  // 创建按钮
   lv_obj_t * btn = lv_button_create(lv_screen_active());     /*Add a button the current screen*/
   // lv_obj_set_pos(btn, 10, 10);                            /*Set its position*/
   lv_obj_align(btn, LV_ALIGN_BOTTOM_LEFT, 10,   -10);
   lv_obj_set_size(btn, 120, 50);                          /*Set its size*/
-  // lv_obj_add_event_cb(btn, btn_event_cb, LV_EVENT_ALL, NULL);           /*Assign a callback to the button*/
+  lv_obj_add_event_cb(btn, btn_event_cb, LV_EVENT_CLICKED, NULL);           /*Assign a callback to the button*/
 
   lv_obj_t * bntlabel = lv_label_create(btn);          /*Add a label to the button*/
   lv_label_set_text(bntlabel, "Button");                     /*Set the labels text*/
@@ -246,6 +249,20 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
 {
     SEGGER_RTT_printf(0, "Stack overflow: %s\n", pcTaskName);
     while(1);
+}
+
+static void btn_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * btn = lv_event_get_target_obj(e);
+    if(code == LV_EVENT_CLICKED) {
+        static uint8_t cnt = 0;
+        cnt++;
+
+        /*Get the first child of the button which is the label and change its text*/
+        lv_obj_t * label = lv_obj_get_child(btn, 0);
+        lv_label_set_text_fmt(label, "Button: %d", cnt);
+    }
 }
 
 /* USER CODE END Application */

@@ -123,18 +123,22 @@ static void touchpad_read(lv_indev_t * indev_drv, lv_indev_data_t * data)
 /*Return true is the touchpad is pressed*/
 static bool touchpad_is_pressed(void)
 {
-    /*Your code comes here*/
-
-    return false;
+    touch_data_t touch_data;
+    bool result = get_touch_data(&touch_data);
+    return result && (touch_data.touch_num > 0);
 }
 
 /*Get the x and y coordinates if the touchpad is pressed*/
 static void touchpad_get_xy(int32_t * x, int32_t * y)
 {
-    /*Your code comes here*/
-
-    (*x) = 0;
-    (*y) = 0;
+    touch_data_t touch_data;
+    if(get_touch_data(&touch_data) && touch_data.touch_num > 0) {
+        (*x) = touch_data.coords[0].x;
+        (*y) = touch_data.coords[0].y;
+    } else {
+        (*x) = 0;
+        (*y) = 0;
+    }
 }
 
 
@@ -146,6 +150,7 @@ static void touchpad_get_xy(int32_t * x, int32_t * y)
 static void button_init(void)
 {
     /*Your code comes here*/
+    // User Button Init in GPIO section
 }
 
 /*Will be called by the library to read the button*/
