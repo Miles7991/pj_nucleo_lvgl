@@ -12,6 +12,9 @@ my first try of lvgl on nucleo
     - 不使用原生的 lcd_st7789 ，而是使用自定义的 disp_flush 函数。
 4. 使用FreeRTOS模式运行LVGL： 选择 #define LV_USE_OS   LV_OS_FREERTOS，不要选择 LV_OS_CMSIS_RTOS2
 
-5. 打开触摸屏，写按钮的Event回调函数
+5. 打开触摸屏：AI帮写好了代码，并分析了之前cb失败的原因
+    - 改了 cst816d read reg write reg.
+    - 找到之前的问题是连续两次调用get_touch_data，但是第一次已经将标志位清零。 
+    - ：将 4 个坐标字节（XH, XL, YH, YL）合并为一个 I2C 事务读取，提高了读取速度。
 6. 使用SPI中断模式
 7. button 加入 Event callback

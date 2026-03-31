@@ -90,8 +90,8 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 #define ADDR_I2C_TOUCH 0x15
-#define ADDR_I2C_TOUCH_READ  0x2A
-#define ADDR_I2C_TOUCH_WRITE 0x2B
+#define ADDR_I2C_TOUCH_READ  0x2B
+#define ADDR_I2C_TOUCH_WRITE 0x2A
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

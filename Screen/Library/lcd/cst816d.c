@@ -10,50 +10,40 @@ static void cst816d_read(uint8_t reg_addr, uint8_t *data, uint32_t length) {
 }
 
 bool get_touch_data(touch_data_t *touch_data) {
-  uint8_t buff[12] = {0};
+  uint8_t buff[4] = {0};
   uint8_t touch_num = 0;
 
   if (cst816d_int_enable) {
     if (false == cst816d_read_flag) {
-      // Serial.println("cst816d_read_flag is false");
       return false;
-    } else {
-      cst816d_read_flag = false;
     }
+    // Note: We'll clear the flag later to ensure we don't miss a touch if read fails
   }
 
   cst816d_read(CST816D_TOUCH_NUM_REG, &touch_num, 1);
-  touch_data->touch_num = touch_num;
   
-  if (touch_num == 0)
+  if (touch_num == 0 || touch_num > CST816D_TOUCH_MAX_NUM) {
+    if (cst816d_int_enable) cst816d_read_flag = false;
+    touch_data->touch_num = 0;
     return false;
-
-
-  cst816d_read(CST816D_TOUCH_XH_REG, &buff[0], 1);
-  cst816d_read(CST816D_TOUCH_XL_REG, &buff[1], 1);
-  cst816d_read(CST816D_TOUCH_YH_REG, &buff[2], 1);
-  cst816d_read(CST816D_TOUCH_YL_REG, &buff[3], 1);
-
-
-
-  for (uint16_t i = 0; i < touch_num; i++) {
-    touch_data->coords[i].x = (((uint16_t)buff[(i * 6) + 0] & 0x0f) << 8) + buff[(i * 6) + 1];
-    touch_data->coords[i].y = (((uint16_t)buff[(i * 6) + 2] & 0x0f) << 8) + buff[(i * 6) + 3];
   }
 
+  touch_data->touch_num = touch_num;
+
+  // Read all 4 bytes of coordinates in one go
+  cst816d_read(CST816D_TOUCH_XH_REG, buff, 4);
+
+  for (uint16_t i = 0; i < touch_num; i++) {
+    // For CST816D, each touch point is 6 bytes but we only need the first 4 for X/Y
+    // Actually, if we only read 4 bytes into buff, i > 0 would be out of bounds.
+    // But since CST816D_TOUCH_MAX_NUM is 1, i will always be 0.
+    touch_data->coords[i].x = (((uint16_t)buff[0] & 0x0f) << 8) | buff[1];
+    touch_data->coords[i].y = (((uint16_t)buff[2] & 0x0f) << 8) | buff[3];
+  }
+
+  if (cst816d_int_enable) cst816d_read_flag = false;
+
   return true;
-  // cst816d_read(CST816D_TOUCH_XH_REG, buff, 1);
-  // for (int i = 0; i < 6; i++)
-  // {
-  //   printf("%x ", buff[i]);
-  // }
-  // printf("\r\n");
-  // for (uint16_t i = 0; i < touch_num; i++) {
-  //   touch_data->coords[i].x = (((uint16_t)buff[(i * 6) + 0] & 0x0f) << 8) + buff[(i * 6) + 1];
-  //   touch_data->coords[i].y = (((uint16_t)buff[(i * 6) + 2] & 0x0f) << 8) + buff[(i * 6) + 3];
-  //   // printf("i: %d, x:%d, y:%d\r\n",, touch_data->coords[i].x, touch_data->coords[i].y);
-  // }
-  // return true;
 }
 
 
