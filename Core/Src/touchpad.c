@@ -105,10 +105,12 @@ static void touchpad_read(lv_indev_t * indev_drv, lv_indev_data_t * data)
 {
     static int32_t last_x = 0;
     static int32_t last_y = 0;
+    touch_data_t touch_data;
 
     /*Save the pressed coordinates and the state*/
-    if(touchpad_is_pressed()) {
-        touchpad_get_xy(&last_x, &last_y);
+    if(get_touch_data(&touch_data) && touch_data.touch_num > 0) {
+        last_x = touch_data.coords[0].x;
+        last_y = touch_data.coords[0].y;
         data->state = LV_INDEV_STATE_PRESSED;
     }
     else {
@@ -123,22 +125,13 @@ static void touchpad_read(lv_indev_t * indev_drv, lv_indev_data_t * data)
 /*Return true is the touchpad is pressed*/
 static bool touchpad_is_pressed(void)
 {
-    touch_data_t touch_data;
-    bool result = get_touch_data(&touch_data);
-    return result && (touch_data.touch_num > 0);
+    return false; // Not used anymore, handled in touchpad_read
 }
 
 /*Get the x and y coordinates if the touchpad is pressed*/
 static void touchpad_get_xy(int32_t * x, int32_t * y)
 {
-    touch_data_t touch_data;
-    if(get_touch_data(&touch_data) && touch_data.touch_num > 0) {
-        (*x) = touch_data.coords[0].x;
-        (*y) = touch_data.coords[0].y;
-    } else {
-        (*x) = 0;
-        (*y) = 0;
-    }
+    // Not used anymore, handled in touchpad_read
 }
 
 
