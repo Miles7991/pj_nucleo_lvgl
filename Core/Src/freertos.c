@@ -45,6 +45,8 @@
 /* USER CODE BEGIN PM */
 void my_print(lv_log_level_t level, const char * buf);
 static void btn_event_cb(lv_event_t * e);
+static void slider_event_cb(lv_event_t * e);
+static lv_obj_t * sldlabel;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -168,19 +170,6 @@ void StartLvglTask(void *argument)
   // 设置屏幕背景（可选）
   lv_obj_set_style_bg_color(scr, lv_color_white(), 0);
   
-  // 创建标签
-  lv_obj_t * label = lv_label_create(scr);
-  lv_label_set_text(label, "HELLO STM32");
-  lv_obj_set_style_text_font(label, &lv_font_montserrat_20, 0); 
-  lv_obj_set_style_text_color(label, lv_palette_main(LV_PALETTE_RED), 0); 
-  lv_obj_center(label);
-  
-  // 创建第二个标签
-  lv_obj_t * label1 = lv_label_create(scr);
-  lv_label_set_text(label1, "HELLO LVGL");
-  lv_obj_set_style_text_font(label1, &lv_font_montserrat_20, 0);
-  lv_obj_set_style_text_color(label1, lv_palette_main(LV_PALETTE_BLUE), 0); 
-  lv_obj_set_pos(label1, 100, 100);
   
   // 创建红色方块
   lv_obj_t * test_rect = lv_obj_create(scr);
@@ -188,7 +177,13 @@ void StartLvglTask(void *argument)
   lv_obj_set_style_bg_color(test_rect, lv_palette_main(LV_PALETTE_RED), 0);
   lv_obj_set_style_bg_opa(test_rect, LV_OPA_COVER, 0);
   lv_obj_align(test_rect, LV_ALIGN_TOP_LEFT, 0, 0);
-  
+  // 创建标签
+  lv_obj_t * label = lv_label_create(scr);
+  lv_label_set_text(label, "HELLO LVGL");
+  lv_obj_set_style_text_font(label, &lv_font_montserrat_20, 0); 
+  lv_obj_set_style_text_color(label, lv_palette_main(LV_PALETTE_RED), 0); 
+  lv_obj_align_to(label, test_rect, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+
   // 创建黄色方块
   lv_obj_t * test_rect1 = lv_obj_create(scr);
   lv_obj_set_size(test_rect1, 50, 50);
@@ -207,6 +202,19 @@ void StartLvglTask(void *argument)
   lv_label_set_text(bntlabel, "Button");                     /*Set the labels text*/
   lv_obj_center(bntlabel);
 
+/**
+ * Create a slider and write its value on a label. 
+ */
+  lv_obj_t * slider = lv_slider_create(lv_screen_active());
+  lv_obj_set_width(slider, 200);                          /*Set the width*/
+  lv_obj_center(slider);                                  /*Align to the center of the parent (screen)*/
+  lv_obj_add_event_cb(slider, slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);     /*Assign an event function*/
+
+  /*Create a label above the slider*/
+  sldlabel = lv_label_create(lv_screen_active());
+  lv_slider_set_value(slider, 50, LV_ANIM_OFF);
+  lv_label_set_text(sldlabel, "bright:50");
+  lv_obj_align_to(sldlabel, slider, LV_ALIGN_OUT_TOP_MID, 0, -15);    /*Align top of the slider*/
 
   /* Infinite loop */
   for(;;)
@@ -263,6 +271,18 @@ static void btn_event_cb(lv_event_t * e)
         lv_obj_t * label = lv_obj_get_child(btn, 0);
         lv_label_set_text_fmt(label, "Button: %d", cnt);
     }
+}
+// 滑动条事件回调函数
+static void slider_event_cb(lv_event_t * e)
+{
+    lv_obj_t * slider = lv_event_get_target_obj(e);
+
+    /*Refresh the text*/
+    uint8_t brightness = lv_slider_get_value(slider);
+    lv_label_set_text_fmt(sldlabel, "bright:%d", brightness);
+    lv_obj_align_to(sldlabel, slider, LV_ALIGN_OUT_TOP_MID, 0, -15);    /*Align top of the slider*/
+    
+    DEV_SetBacklight(brightness);
 }
 
 /* USER CODE END Application */
