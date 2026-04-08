@@ -28,6 +28,7 @@
 #include "SEGGER_RTT.h"
 #include "lcd.h"
 #include "touchpad.h"
+#include "fatfs.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,7 +63,7 @@ lv_display_t * my_disp;
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .stack_size = 512 * 10,
   .priority = (osPriority_t) osPriorityNormal,
 };
 
@@ -126,6 +127,64 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
+  // FRESULT res;                                          /* FatFs function common result code */
+  // uint32_t byteswritten, bytesread;                     /* File write/read counts */
+  // uint8_t wtext[] = "Hello from STM32 Nucleo + FATFS + SPI!"; /* File write buffer */
+  // uint8_t rtext[_MAX_SS];                               /* File read buffer */
+
+  // SEGGER_RTT_printf(0, "\r\n--- FATFS SPI SD Card Example ---\r\n");
+
+  // /* 1. Mount SD Card */
+  // res = f_mount(&USERFatFS, (TCHAR const*)USERPath, 1);
+  // if (res != FR_OK) {
+  //   SEGGER_RTT_printf(0, "f_mount error: %d\r\n", res);
+  // } else {
+  //   SEGGER_RTT_printf(0, "f_mount success!\r\n");
+
+  //   /* 2. Create and Open a new text file object with write access */
+  //   res = f_open(&USERFile, "NUCLEO.TXT", FA_CREATE_ALWAYS | FA_WRITE);
+  //   if (res != FR_OK) {
+  //     SEGGER_RTT_printf(0, "f_open (write) error: %d\r\n", res);
+  //   } else {
+  //     SEGGER_RTT_printf(0, "f_open (write) success!\r\n");
+
+  //     /* 3. Write data to the text file */
+  //     res = f_write(&USERFile, wtext, sizeof(wtext), (void *)&byteswritten);
+  //     if ((byteswritten == 0) || (res != FR_OK)) {
+  //       SEGGER_RTT_printf(0, "f_write error: %d\r\n", res);
+  //     } else {
+  //       SEGGER_RTT_printf(0, "f_write success! written: %d bytes\r\n", byteswritten);
+  //     }
+
+  //     /* 4. Close the open text file */
+  //     f_close(&USERFile);
+  //   }
+
+  //   /* 5. Open the text file object with read access */
+  //   res = f_open(&USERFile, "NUCLEO.TXT", FA_READ);
+  //   if (res != FR_OK) {
+  //     SEGGER_RTT_printf(0, "f_open (read) error: %d\r\n", res);
+  //   } else {
+  //     SEGGER_RTT_printf(0, "f_open (read) success!\r\n");
+
+  //     /* 6. Read data from the text file */
+  //     res = f_read(&USERFile, rtext, sizeof(rtext) - 1, (UINT*)&bytesread);
+  //     if ((bytesread == 0) || (res != FR_OK)) {
+  //       SEGGER_RTT_printf(0, "f_read error: %d\r\n", res);
+  //     } else {
+  //       rtext[bytesread] = '\0'; /* Ensure null-terminated string */
+  //       SEGGER_RTT_printf(0, "f_read success! read content: %s\r\n", rtext);
+  //     }
+
+  //     /* 7. Close the open text file */
+  //     f_close(&USERFile);
+  //   }
+    
+  //   /* 8. Unmount */
+  //   // f_mount(NULL, (TCHAR const*)USERPath, 0);
+  // }
+
+  /* Infinite loop */
   while(1)
   {
     osDelay(1000);
@@ -147,10 +206,14 @@ void StartLvglTask(void *argument)
   }
   
   // lvgl init
+#if LV_USE_LOG
   lv_log_register_print_cb(my_print);
+#endif
   lv_init();
+#if LV_USE_LOG
   // lv_init 会清除 lv_log_register_print_cb 的 cb 需要再次注册 my_print
   lv_log_register_print_cb(my_print);
+#endif
   lv_tick_set_cb(HAL_GetTick);
   lv_port_display_init();
 
