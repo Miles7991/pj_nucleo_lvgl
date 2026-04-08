@@ -19,7 +19,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "FreeRTOS.h"
-#include "src/misc/lv_color.h"
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
