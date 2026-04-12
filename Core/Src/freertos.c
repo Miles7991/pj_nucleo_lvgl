@@ -321,6 +321,12 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName)
     while(1);
 }
 
+void vApplicationMallocFailedHook(void)
+{
+  SEGGER_RTT_printf(0, "malloc failed in task: %s\n", pcTaskGetName(NULL));
+  while(1);
+}
+
 static void btn_event_cb(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
