@@ -59,6 +59,15 @@ const osThreadAttr_t lvglTask_attributes = {
 };
 lv_display_t * my_disp;
 
+// Mutex for SPI2 access synchronization between FATFS and LVGL
+osMutexId_t spi2_mutex;                   
+const osMutexAttr_t spi2_mutex_attr = {
+  "spi2_mutex",
+  osMutexRecursive | osMutexPrioInherit,
+  NULL,
+  0
+};
+
 uint8_t wtext[] = "Hello from STM32 Nucleo + FATFS + SPI!"; /* File write buffer */
 uint8_t rtext[_MAX_SS];                               /* File read buffer */
 /* USER CODE END Variables */
@@ -91,6 +100,9 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
+  if (spi2_mutex == NULL) {
+    spi2_mutex = osMutexNew(&spi2_mutex_attr);
+  }
   /* USER CODE END RTOS_MUTEX */
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */

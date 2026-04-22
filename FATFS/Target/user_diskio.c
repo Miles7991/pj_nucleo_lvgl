@@ -66,6 +66,9 @@
 #define SD_TYPE_V2HC    0x04
 
 /* Private variables ---------------------------------------------------------*/
+/* 用于同步访问SPI2，确保在多线程环境下安全操作*/
+extern osMutexId_t spi2_mutex;
+
 /* Disk status */
 static volatile DSTATUS Stat = STA_NOINIT;
 static uint8_t CardType = 0;
@@ -114,16 +117,32 @@ static uint8_t SD_WaitReady(void)
     return 0;
 }
 
+static void SD_Deselect(void)
+{
+    SD_CS_HIGH();
+    SPI_ReadWriteByte(0xFF);
+    if (spi2_mutex != NULL) osMutexRelease(spi2_mutex);
+}
+
+static uint8_t SD_Select(void)
+{
+    if (spi2_mutex != NULL) osMutexAcquire(spi2_mutex, osWaitForever);
+    SD_CS_LOW();
+    if (SD_WaitReady() != 0) {
+        SD_Deselect();
+        return 1;
+    }
+    return 0;
+}
+
 static uint8_t SD_SendCmd(uint8_t cmd, uint32_t arg, uint8_t crc)
 {
     uint8_t res;
     uint8_t n;
 
-    SD_CS_HIGH();
-    SPI_ReadWriteByte(0xFF);
-    SD_CS_LOW();
-
-    if (SD_WaitReady()) return 0xFF;
+    if (cmd != CMD12) {
+        if (SD_WaitReady()) return 0xFF;
+    }
 
     SPI_ReadWriteByte(cmd | 0x40);
     SPI_ReadWriteByte(arg >> 24);
@@ -192,11 +211,13 @@ DSTATUS USER_initialize (
 	BYTE pdrv           /* Physical drive nmuber to identify the drive */
 )
 {
-  /* USER COD E BEGIN INIT */
+  /* USER CODE BEGIN INIT */
     uint8_t n, cmd, ty, ocr[4];
     uint32_t i;
 
     if (pdrv) return STA_NOINIT;
+
+    if (spi2_mutex != NULL) osMutexAcquire(spi2_mutex, osWaitForever);
 
     // Slow clock for initialization
     hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
@@ -205,6 +226,7 @@ DSTATUS USER_initialize (
     SD_CS_HIGH();
     for (n = 10; n; n--) SPI_ReadWriteByte(0xFF);
 
+    SD_CS_LOW();
     ty = 0;
     if (SD_SendCmd(CMD0, 0, 0x95) == 1) {
         if (SD_SendCmd(CMD8, 0x1AA, 0x87) == 1) {
@@ -227,17 +249,23 @@ DSTATUS USER_initialize (
         }
     }
     CardType = ty;
+    
     SD_CS_HIGH();
     SPI_ReadWriteByte(0xFF);
 
     if (ty) {
         Stat &= ~STA_NOINIT;
-        // High clock for data transfer
-        hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+        // High clock for data transfer (e.g. 21MHz for 84MHz fPCLK)
+        hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
         HAL_SPI_Init(&hspi2);
     } else {
         Stat |= STA_NOINIT;
+        // Restore speed for other devices even on failure
+        hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+        HAL_SPI_Init(&hspi2);
     }
+
+    if (spi2_mutex != NULL) osMutexRelease(spi2_mutex);
 
     return Stat;
   /* USER CODE END INIT */
@@ -277,6 +305,8 @@ DRESULT USER_read (
     if (pdrv || !count) return RES_PARERR;
     if (Stat & STA_NOINIT) return RES_NOTRDY;
 
+    if (SD_Select() != 0) return RES_NOTRDY;
+
     if (!(CardType & SD_TYPE_V2HC)) sector *= 512;
 
     if (count == 1) {
@@ -292,8 +322,8 @@ DRESULT USER_read (
             SD_SendCmd(CMD12, 0, 0);
         }
     }
-    SD_CS_HIGH();
-    SPI_ReadWriteByte(0xFF);
+    
+    SD_Deselect();
 
     return count ? RES_ERROR : RES_OK;
   /* USER CODE END READ */
@@ -319,6 +349,8 @@ DRESULT USER_write (
     if (pdrv || !count) return RES_PARERR;
     if (Stat & STA_NOINIT) return RES_NOTRDY;
 
+    if (SD_Select() != 0) return RES_NOTRDY;
+
     if (!(CardType & SD_TYPE_V2HC)) sector *= 512;
 
     if (count == 1) {
@@ -336,8 +368,8 @@ DRESULT USER_write (
             if (SD_SendBlock(0, 0xFD)) count = 1;
         }
     }
-    SD_CS_HIGH();
-    SPI_ReadWriteByte(0xFF);
+    
+    SD_Deselect();
 
     return count ? RES_ERROR : RES_OK;
   /* USER CODE END WRITE */
@@ -365,6 +397,8 @@ DRESULT USER_ioctl (
 
     if (pdrv) return RES_PARERR;
     if (Stat & STA_NOINIT) return RES_NOTRDY;
+
+    if (SD_Select() != 0) return RES_NOTRDY;
 
     res = RES_ERROR;
     switch (cmd) {
@@ -401,8 +435,7 @@ DRESULT USER_ioctl (
             break;
     }
 
-    SD_CS_HIGH();
-    SPI_ReadWriteByte(0xFF);
+    SD_Deselect();
 
     return res;
   /* USER CODE END IOCTL */

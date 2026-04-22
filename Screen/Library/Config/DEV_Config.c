@@ -18,7 +18,7 @@
 #include "spi.h"
 #include "stm32f4xx_hal_tim.h"
 #include "cmsis_os.h"
-uint32_t fd;
+extern osMutexId_t spi2_mutex;
 int INT_PIN;
 
 /**
@@ -87,16 +87,20 @@ UBYTE DEV_ModuleInit(void)
 
 void DEV_SPI_WriteByte(uint8_t Value)
 {
+
+    if (spi2_mutex != NULL) osMutexAcquire(spi2_mutex, osWaitForever);
     LCD_CS_0;
     // HAL_SPI_Transmit(&hspi2, &Value, 1, HAL_MAX_DELAY);
     HAL_SPI_Transmit_DMA(&hspi2, &Value, 1);
     // 等待DMA传输完成
     while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
     LCD_CS_1;
+    if (spi2_mutex != NULL) osMutexRelease(spi2_mutex);
 }
 
 void DEV_SPI_Write_nByte(uint8_t *pData, uint32_t Len)
 {
+    if (spi2_mutex != NULL) osMutexAcquire(spi2_mutex, osWaitForever);
     // 发送数据 记得先拉低CS
     LCD_CS_0;
     // HAL_SPI_Transmit(&hspi2, pData, Len, HAL_MAX_DELAY);
@@ -104,6 +108,7 @@ void DEV_SPI_Write_nByte(uint8_t *pData, uint32_t Len)
     // 等待DMA传输完成
     while (HAL_SPI_GetState(&hspi2) != HAL_SPI_STATE_READY);
     LCD_CS_1;
+    if (spi2_mutex != NULL) osMutexRelease(spi2_mutex);
 }
 
 /******************************************************************************
