@@ -46,7 +46,12 @@
 void my_print(lv_log_level_t level, const char * buf);
 static void btn_event_cb(lv_event_t * e);
 static void slider_event_cb(lv_event_t * e);
+static void sd_btn_event_cb(lv_event_t * e);
+static void file_list_event_cb(lv_event_t * e);
+static void close_win_event_cb(lv_event_t * e);
+
 static lv_obj_t * sldlabel;
+static lv_obj_t * file_list_win = NULL;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -54,7 +59,7 @@ static lv_obj_t * sldlabel;
 osThreadId_t lvglTaskHandle;
 const osThreadAttr_t lvglTask_attributes = {
   .name = "lvglTask",
-  .stack_size = 512 * 10,
+  .stack_size = 512 * 20,  // 增加栈大小以避免栈溢出
   .priority = (osPriority_t) osPriorityHigh,
 };
 lv_display_t * my_disp;
@@ -194,7 +199,7 @@ void StartDefaultTask(void *argument)
     }
     
     /* 8. Unmount */
-    f_mount(NULL, (TCHAR const*)USERPath, 0);
+    // f_mount(NULL, (TCHAR const*)USERPath, 0);
   }
 
   /* Infinite loop */
@@ -254,7 +259,7 @@ void StartLvglTask(void *argument)
   lv_obj_align(test_rect, LV_ALIGN_TOP_LEFT, 0, 0);
   // 创建标签
   lv_obj_t * label = lv_label_create(scr);
-  lv_label_set_text(label, "HELLO LVGL");
+  lv_label_set_text(label, "HI!");
   lv_obj_set_style_text_font(label, &lv_font_montserrat_20, 0); 
   lv_obj_set_style_text_color(label, lv_palette_main(LV_PALETTE_RED), 0); 
   lv_obj_align_to(label, test_rect, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
@@ -276,6 +281,16 @@ void StartLvglTask(void *argument)
   lv_obj_t * bntlabel = lv_label_create(btn);          /*Add a label to the button*/
   lv_label_set_text(bntlabel, "Button");                     /*Set the labels text*/
   lv_obj_center(bntlabel);
+
+  // 创建 SD 卡读取按钮
+  lv_obj_t * sd_btn = lv_button_create(lv_screen_active());
+  lv_obj_align(sd_btn, LV_ALIGN_TOP_RIGHT, -10, 10);
+  lv_obj_set_size(sd_btn, 120, 50);
+  lv_obj_add_event_cb(sd_btn, sd_btn_event_cb, LV_EVENT_CLICKED, NULL);
+
+  lv_obj_t * sd_label = lv_label_create(sd_btn);
+  lv_label_set_text(sd_label, "SD Files");
+  lv_obj_center(sd_label);
 
 /**
  * Create a slider and write its value on a label. 
@@ -366,5 +381,132 @@ static void slider_event_cb(lv_event_t * e)
     DEV_SetBacklight(brightness);
 }
 
-/* USER CODE END Application */
+static void close_win_event_cb(lv_event_t * e)
+{
+    if(file_list_win) {
+        lv_obj_delete(file_list_win);
+        file_list_win = NULL;
+    }
+}
 
+// 修正后的子窗口关闭逻辑
+static void close_sub_win_cb(lv_event_t * e)
+{
+    lv_obj_t * win = (lv_obj_t *)lv_event_get_user_data(e);
+    lv_obj_delete(win);
+}
+
+static void file_list_event_cb(lv_event_t * e)
+{
+    lv_obj_t * obj = lv_event_get_target_obj(e);
+    const char * filename = lv_list_get_button_text(lv_obj_get_parent(obj), obj);
+    
+    SEGGER_RTT_printf(0, "Selected file: %s\r\n", filename);
+    
+    // 检查是否是 .txt 文件
+    if(strstr(filename, ".TXT") || strstr(filename, ".txt")) {
+        static FIL file;
+        static FRESULT res;
+        static UINT br;
+        static char text_buf[512]; // 使用静态缓冲区避免频繁分配
+
+        res = f_open(&file, filename, FA_READ);
+        if(res == FR_OK) {
+            f_read(&file, text_buf, sizeof(text_buf) - 1, &br);
+            text_buf[br] = '\0';
+            f_close(&file);
+
+            lv_obj_t * win = lv_win_create(lv_screen_active());
+            if(!win) {
+                SEGGER_RTT_printf(0, "Failed to create file window\r\n");
+                return;
+            }
+            lv_obj_set_size(win, 220, 220);
+            lv_obj_center(win);
+            lv_win_add_title(win, filename);
+            lv_obj_t * btn = lv_win_add_button(win, LV_SYMBOL_CLOSE, 40);
+            lv_obj_add_event_cb(btn, close_sub_win_cb, LV_EVENT_CLICKED, win);
+
+            lv_obj_t * cont = lv_win_get_content(win);
+            lv_obj_t * label = lv_label_create(cont);
+            if(label) {
+                lv_label_set_text(label, text_buf);
+                lv_obj_set_width(label, lv_pct(100));
+                lv_label_set_long_mode(label, LV_LABEL_LONG_WRAP);
+            }
+        } else {
+            SEGGER_RTT_printf(0, "Failed to open file: %s, err: %d\r\n", filename, res);
+        }
+    }
+}
+
+static void sd_btn_event_cb(lv_event_t * e)
+{
+    static FRESULT res;
+    static DIR dir;
+    static FILINFO fno;
+
+    // 如果窗口已打开，先关闭
+    if(file_list_win) {
+        lv_obj_delete(file_list_win);
+        file_list_win = NULL;
+    }
+
+    // 重新挂载确保能读到最新状态（如果之前没挂载）
+    res = f_mount(&USERFatFS, (TCHAR const*)USERPath, 1);
+    if(res != FR_OK) {
+        SEGGER_RTT_printf(0, "f_mount error: %d\r\n", res);
+        return;
+    }
+
+    res = f_opendir(&dir, "/");
+    if(res != FR_OK) {
+        SEGGER_RTT_printf(0, "Failed to open root dir, err: %d\r\n", res);
+        return;
+    }
+
+    // 创建列表窗口
+    file_list_win = lv_win_create(lv_screen_active());
+    if(!file_list_win) {
+        SEGGER_RTT_printf(0, "Failed to create window\r\n");
+        f_closedir(&dir);
+        return;
+    }
+    lv_obj_set_size(file_list_win, 240, 240);
+    lv_obj_center(file_list_win);
+    lv_win_add_title(file_list_win, "SD Card Files");
+    lv_obj_t * close_btn = lv_win_add_button(file_list_win, LV_SYMBOL_CLOSE, 40);
+    lv_obj_add_event_cb(close_btn, close_win_event_cb, LV_EVENT_CLICKED, NULL);
+
+    lv_obj_t * cont = lv_win_get_content(file_list_win);
+    lv_obj_t * list = lv_list_create(cont);
+    if(!list) {
+        SEGGER_RTT_printf(0, "Failed to create list\r\n");
+        f_closedir(&dir);
+        return;
+    }
+    lv_obj_set_size(list, lv_pct(100), lv_pct(100));
+
+    // 限制文件数量，避免创建过多UI元素
+    uint8_t file_count = 0;
+    while(1) {
+        res = f_readdir(&dir, &fno);
+        if(res != FR_OK || fno.fname[0] == 0) break;
+        if(file_count >= 10) break;  // 限制最多显示10个文件
+
+        lv_obj_t * btn;
+        if(fno.fattrib & AM_DIR) {
+            btn = lv_list_add_button(list, LV_SYMBOL_DIRECTORY, fno.fname);
+        } else {
+            btn = lv_list_add_button(list, LV_SYMBOL_FILE, fno.fname);
+        }
+        if(btn) {
+            lv_obj_add_event_cb(btn, file_list_event_cb, LV_EVENT_CLICKED, NULL);
+            file_count++;
+        }
+    }
+    f_closedir(&dir);
+    SEGGER_RTT_printf(0, "SD card scan completed, found %d files\r\n", file_count);
+}
+
+/* USER CODE END Application */
