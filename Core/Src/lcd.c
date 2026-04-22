@@ -39,7 +39,7 @@ void lv_port_display_init(void)
     uint8_t * buf1 = NULL;
     uint8_t * buf2 = NULL;
 
-    uint32_t buf_size = ST7789_WIDTH * ST7789_HEIGHT / 40 * lv_color_format_get_size(lv_display_get_color_format(
+    uint32_t buf_size = ST7789_WIDTH * ST7789_HEIGHT / 10 * lv_color_format_get_size(lv_display_get_color_format(
                                                                                               lcd_disp));
 
     buf1 = lv_malloc(buf_size);
